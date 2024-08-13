@@ -7,6 +7,7 @@ def ensure_temp_directory():
     if not os.path.exists('temp'):
         os.makedirs('temp')
 
+
 def imageToData(name):
     try:
         image = Image.open(name)
@@ -22,10 +23,12 @@ def imageToData(name):
         print(f"Error: {e}")
         return []
 
-def byte1Calc(screen, x, y):
+
+def byte1Calc(x, y):
     byte = (y & 0b00001111) << 4  # Y
     byte |= (x & 0b00001111)  # X
     return byte
+
 
 def reduceImage(name):
     try:
@@ -45,7 +48,9 @@ def reduceImage(name):
     except Exception as e:
         print(f"Error: {e}")
 
+
 output = []
+
 
 def clear_output():
     global output
@@ -70,17 +75,16 @@ def ImageToBytes(imageName, printHex=False, printBin=False, PrintDec=False, prin
             byte4 = color[2]
             # Write to the pixel (Screen, X, Y, Color)
             output.append(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
-            if (printHex):
+            if printHex:
                 print(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
-            if (printBin):
+            if printBin:
                 print(f"{byte1:08b} {byte2:08b} {byte3:08b} {byte4:08b}")
-            if (PrintDec):
+            if PrintDec:
                 print(f"{byte1} {byte2} {byte3} {byte4}")
-            if (printFormatted):
+            if printFormatted:
                 print(f"X: {x}, Y: {y}, Color: {color}")
             if multiplePrints:
                 print("-------------------------------------------------")
-
 
     output_str = "\n".join(output)
     print("Image converted to bytecode")
