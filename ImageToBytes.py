@@ -1,10 +1,12 @@
 import os
+
 from PIL import Image
-import pyperclip
+
 
 def ensure_temp_directory():
     if not os.path.exists('temp'):
         os.makedirs('temp')
+
 
 def imageToData(name):
     try:
@@ -21,25 +23,29 @@ def imageToData(name):
         print(f"Error: {e}")
         return []
 
-def byte1Calc(screen, x, y):
-    byte = (y & 0b00000001) << 7  # 1 LSBs of Y
-    byte |= (x & 0b00000111) << 4  # 3 LSBs of X
-    byte |= (screen & 0b00001111)  # 4 LSBs of Screen number
+
+def byte1Calc(x, y):
+    byte = (y & 0b00011100) << 3  # Y
+    byte |= (x & 0b00011111)  # X
     return byte
+
 
 def byte2Calc(y, color):
-    byte = (color[0] & 0b01111110) << 1  # 6 MSBs of red
-    byte |= (y & 0b00000110) >> 1  # 2 LSBs of Y
+    byte = (y & 0b00000011)  # Y
+    byte |= (color & 0b01111110) << 1  # Red
     return byte
+
 
 def byte3Calc(color):
-    byte = (color[1] & 0b11111110)  # 7 MSBs of green
-    byte |= (color[0] & 0b10000000) >> 7  # LSB of red
+    byte = (color & 0b10000000) >> 7  # Red
+    byte |= (color & 0b11111110)  # Green
     return byte
 
+
 def byte4Calc(color):
-    byte = (color[2] & 0b11111110) >> 1  # 7 MSBs of blue
+    byte = (color[2] & 0b11111110) >> 1  # Blue
     return byte
+
 
 def reduceImage(name):
     try:
@@ -59,53 +65,48 @@ def reduceImage(name):
     except Exception as e:
         print(f"Error: {e}")
 
+
 output = []
+
 
 def clear_output():
     global output
     output = []
 
-# Define the screen addresses in sequential order
-screens = [
-    0, 1, 2, 3,
-    4, 5, 6, 7,
-    8, 9, 10, 11,
-    12, 13, 14, 15
-]
+
+def clear_colors():
+    global colors
+    colors = []
+
 
 def ImageToBytes(imageName, printHex=False, printBin=False, PrintDec=False, printFormatted=False):
     colors = imageToData(imageName)
     multiplePrints = sum([printHex, printBin, PrintDec, printFormatted]) >= 2
 
-    for i in range(4):
-        for j in range(4):
-            # Current screen address
-            screen = screens[i * 4 + j]
-            # Loop through each pixel in the 8x8 grid of the current screen
-            for y in range(8):
-                for x in range(8):
-                    # Calculate the color index
-                    color_index = ((i * 8 + y) * 32) + (j * 8 + x)
-                    # Extract the RGB components
-                    color = colors[color_index]
-                    # Calculate the four bytes
-                    byte1 = byte1Calc(screen, x, y)
-                    byte2 = byte2Calc(y, color)
-                    byte3 = byte3Calc(color)
-                    byte4 = byte4Calc(color)
-                    # Write to the pixel (Screen, X, Y, Color)
-                    output.append(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
-                    if(printHex):
-                        print(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
-                    if(printBin):
-                        print(f"{byte1:08b} {byte2:08b} {byte3:08b} {byte4:08b}")
-                    if(PrintDec):
-                        print(f"{byte1} {byte2} {byte3} {byte4}")
-                    if(printFormatted):
-                        print(f"Screen: {screen}, X: {x}, Y: {y}, Color: {color}")
-                    if multiplePrints:
-                        print("-------------------------------------------------")
-
+    # Loop through each pixel in the 8x8 grid of the current screen
+    for y in range(32):
+        for x in range(32):
+            # Calculate the color index
+            color_index = y * 32 + x
+            # Extract the RGB components
+            color = colors[color_index]
+            # Calculate the four bytes
+            byte1 = byte1Calc(x, y)
+            byte2 = color[0]
+            byte3 = color[1]
+            byte4 = color[2]
+            # Write to the pixel (Screen, X, Y, Color)
+            output.append(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
+            if printHex:
+                print(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
+            if printBin:
+                print(f"{byte1:08b} {byte2:08b} {byte3:08b} {byte4:08b}")
+            if PrintDec:
+                print(f"{byte1} {byte2} {byte3} {byte4}")
+            if printFormatted:
+                print(f"X: {x}, Y: {y}, Color: {color}")
+            if multiplePrints:
+                print("-------------------------------------------------")
 
     output_str = "\n".join(output)
     print("Image converted to bytecode")

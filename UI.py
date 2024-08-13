@@ -1,10 +1,3 @@
-from tkinter import Tk, filedialog, Button, Label, Text, Toplevel, BooleanVar, Checkbutton, Frame
-from tkinter import ttk
-from PIL import Image, ImageTk
-import os
-import sys
-import ImageToBytes
-
 class UI:
     def __init__(self):
         self.root = Tk()
@@ -92,8 +85,8 @@ class UI:
             print(f"Image path: {self.file_path}")
 
     def convert_to_bytecode(self):
-
         ImageToBytes.clear_output()
+        ImageToBytes.clear_colors()
 
         bytecode = ImageToBytes.ImageToBytes(
             "temp/reduced.jpg",
@@ -112,32 +105,23 @@ class UI:
         copy_button = Button(bytecode_window, text="Copy to Clipboard", command=lambda: self.copy_to_clipboard(bytecode))
         copy_button.pack()
 
-        # Display the bytecode in the new window
-        text_widget = Text(bytecode_window)
+        # Create a frame to hold the Text widget and scrollbar
+        frame = Frame(bytecode_window)
+        frame.pack(expand=1, fill='both')
+
+        # Create a Text widget for displaying the bytecode
+        text_widget = Text(frame)
         text_widget.insert('1.0', bytecode)
-        text_widget.pack()
+        text_widget.pack(side='left', expand=1, fill='both')
+
+        # Create a Scrollbar and link it to the Text widget
+        scrollbar = Scrollbar(frame, command=text_widget.yview)
+        scrollbar.pack(side='right', fill='y')
+        text_widget.config(yscrollcommand=scrollbar.set)
 
         os.remove("temp/reduced.jpg")
 
     def copy_to_clipboard(self, bytecode):
         self.root.clipboard_clear()
         self.root.clipboard_append(bytecode)
-        self.root.update()  # Keeps the clipboard content after the window is closed
-        print("Bytecode copied to clipboard")
-
-class TextRedirector:
-    def __init__(self, text_widget):
-        self.text_widget = text_widget
-
-    def write(self, string):
-        self.text_widget.insert('end', string)
-        self.text_widget.see('end')
-
-    def flush(self):
-        pass
-
-def main():
-    UI()
-
-if __name__ == "__main__":
-    main()
+        self.root.update()  # now it stays on the clipboard after the window is closed
