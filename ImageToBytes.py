@@ -25,8 +25,25 @@ def imageToData(name):
 
 
 def byte1Calc(x, y):
-    byte = (y & 0b00001111) << 4  # Y
-    byte |= (x & 0b00001111)  # X
+    byte = (y & 0b00011100) << 3  # Y
+    byte |= (x & 0b00011111)  # X
+    return byte
+
+
+def byte2Calc(y, color):
+    byte = (y & 0b00000011)  # Y
+    byte |= (color & 0b01111110) << 1  # Red
+    return byte
+
+
+def byte3Calc(color):
+    byte = (color & 0b10000000) >> 7  # Red
+    byte |= (color & 0b11111110)  # Green
+    return byte
+
+
+def byte4Calc(color):
+    byte = (color[2] & 0b11111110) >> 1  # Blue
     return byte
 
 
@@ -55,6 +72,11 @@ output = []
 def clear_output():
     global output
     output = []
+
+
+def clear_colors():
+    global colors
+    colors = []
 
 
 def ImageToBytes(imageName, printHex=False, printBin=False, PrintDec=False, printFormatted=False):
