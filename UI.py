@@ -5,6 +5,7 @@ import os
 import sys
 import ImageToBytes
 
+
 class UI:
     def __init__(self):
         self.root = Tk()
@@ -32,7 +33,8 @@ class UI:
         self.button = Button(self.image_frame, text="Select Image", command=self.select_image)
         self.button.pack()
 
-        self.convert_button = Button(self.image_frame, text="Convert to Bytecode", command=self.convert_to_bytecode, state='disabled')
+        self.convert_button = Button(self.image_frame, text="Convert to Bytecode", command=self.convert_to_bytecode,
+                                     state='disabled')
         self.convert_button.pack()
 
         self.image_label = Label(self.image_frame)
@@ -109,7 +111,8 @@ class UI:
         bytecode_window.geometry("400x300")
 
         # Add a button to copy bytecode to clipboard at the top
-        copy_button = Button(bytecode_window, text="Copy to Clipboard", command=lambda: self.copy_to_clipboard(bytecode))
+        copy_button = Button(bytecode_window, text="Copy to Clipboard",
+                             command=lambda: self.copy_to_clipboard(bytecode))
         copy_button.pack()
 
         # Display the bytecode in the new window
@@ -125,6 +128,7 @@ class UI:
         self.root.update()  # Keeps the clipboard content after the window is closed
         print("Bytecode copied to clipboard")
 
+
 class TextRedirector:
     def __init__(self, text_widget):
         self.text_widget = text_widget
@@ -136,8 +140,10 @@ class TextRedirector:
     def flush(self):
         pass
 
+
 def main():
     UI()
+
 
 if __name__ == "__main__":
     main()

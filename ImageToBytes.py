@@ -1,10 +1,11 @@
 import os
 from PIL import Image
-import pyperclip
+
 
 def ensure_temp_directory():
     if not os.path.exists('temp'):
         os.makedirs('temp')
+
 
 def imageToData(name):
     try:
@@ -21,25 +22,31 @@ def imageToData(name):
         print(f"Error: {e}")
         return []
 
+
 def byte1Calc(screen, x, y):
     byte = (y & 0b00000001) << 7  # 1 LSBs of Y
     byte |= (x & 0b00000111) << 4  # 3 LSBs of X
     byte |= (screen & 0b00001111)  # 4 LSBs of Screen number
     return byte
 
+
 def byte2Calc(y, color):
     byte = (color[0] & 0b01111110) << 1  # 6 MSBs of red
     byte |= (y & 0b00000110) >> 1  # 2 LSBs of Y
     return byte
 
+
 def byte3Calc(color):
     byte = (color[1] & 0b11111110)  # 7 MSBs of green
     byte |= (color[0] & 0b10000000) >> 7  # LSB of red
+
     return byte
+
 
 def byte4Calc(color):
     byte = (color[2] & 0b11111110) >> 1  # 7 MSBs of blue
     return byte
+
 
 def reduceImage(name):
     try:
@@ -57,21 +64,27 @@ def reduceImage(name):
         image = image.resize((32, 32))
         image.save("temp/reduced.jpg")
     except Exception as e:
+
         print(f"Error: {e}")
 
+
 output = []
+
 
 def clear_output():
     global output
     output = []
 
 # Define the screen addresses in sequential order
+
+
 screens = [
     0, 1, 2, 3,
     4, 5, 6, 7,
     8, 9, 10, 11,
     12, 13, 14, 15
 ]
+
 
 def ImageToBytes(imageName, printHex=False, printBin=False, PrintDec=False, printFormatted=False):
     colors = imageToData(imageName)
@@ -95,17 +108,16 @@ def ImageToBytes(imageName, printHex=False, printBin=False, PrintDec=False, prin
                     byte4 = byte4Calc(color)
                     # Write to the pixel (Screen, X, Y, Color)
                     output.append(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
-                    if(printHex):
+                    if printHex:
                         print(f"{byte1:02X} {byte2:02X} {byte3:02X} {byte4:02X}")
-                    if(printBin):
+                    if printBin:
                         print(f"{byte1:08b} {byte2:08b} {byte3:08b} {byte4:08b}")
-                    if(PrintDec):
+                    if PrintDec:
                         print(f"{byte1} {byte2} {byte3} {byte4}")
-                    if(printFormatted):
+                    if printFormatted:
                         print(f"Screen: {screen}, X: {x}, Y: {y}, Color: {color}")
                     if multiplePrints:
                         print("-------------------------------------------------")
-
 
     output_str = "\n".join(output)
     print("Image converted to bytecode")
